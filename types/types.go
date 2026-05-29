@@ -72,18 +72,19 @@ func ParseResourceLimits(rl ResourcesLimits) (milliCpus *int, memoryBytes *int64
 		// https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/#memory-units
 		raw := *rl.Memory
 		var multiplier int64 = 1
-		if s, m := findIPowerSuffix(raw, []string{"K", "M", "G", "T"}, 1000); m > 0 {
+		if s, m := findIPowerSuffix(raw, []string{"K", "M", "G", "T", "P", "E"}, 1000); m > 0 {
 			raw = strings.TrimSuffix(raw, s)
 			multiplier = m
-		} else if s, m = findIPowerSuffix(raw, []string{"Ki", "Mi", "Gi", "Ti"}, 1024); m > 0 {
+		} else if s, m = findIPowerSuffix(raw, []string{"Ki", "Mi", "Gi", "Ti", "Pi", "Ei"}, 1024); m > 0 {
 			raw = strings.TrimSuffix(raw, s)
 			multiplier = m
 		}
-		if v, err := strconv.ParseInt(raw, 10, 64); err != nil {
+		// ParseFloat handles both plain integers and decimals like "1.5".
+		if v, err := strconv.ParseFloat(raw, 64); err != nil {
 			return nil, nil, fmt.Errorf("failed to parse memory '%s' as a number", raw)
 		} else {
-			v *= multiplier
-			memoryBytes = &v
+			b := int64(v * float64(multiplier))
+			memoryBytes = &b
 		}
 	}
 	return

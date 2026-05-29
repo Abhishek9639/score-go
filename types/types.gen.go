@@ -189,7 +189,7 @@ type ResourcesLimits struct {
 	Cpu *string `json:"cpu,omitempty" yaml:"cpu,omitempty" mapstructure:"cpu,omitempty"`
 
 	// The memory limit in bytes with optional unit specifier. For example 125M or
-	// 1Gi.
+	// 1.5Gi.
 	Memory *string `json:"memory,omitempty" yaml:"memory,omitempty" mapstructure:"memory,omitempty"`
 }
 

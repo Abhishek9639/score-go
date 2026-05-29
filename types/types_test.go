@@ -43,4 +43,18 @@ func TestParseResourceLimits(t *testing.T) {
 	assert.Equal(t, "-1 -1 failed to parse cpus 'banana' as a number", parseAndFormatResourceLimits(ResourcesLimits{Cpu: Ref("banana"), Memory: nil}))
 	assert.Equal(t, "-1 -1 failed to parse memory 'banana' as a number", parseAndFormatResourceLimits(ResourcesLimits{Cpu: nil, Memory: Ref("banana")}))
 	assert.Equal(t, "200 128974848 <nil>", parseAndFormatResourceLimits(ResourcesLimits{Cpu: Ref("200m"), Memory: Ref("123Mi")}))
+
+	// Decimal memory values (the case from score-spec/spec#195).
+	// 1.5Gi == 1.5 * 1024^3 == 1610612736 bytes.
+	assert.Equal(t, "-1 1610612736 <nil>", parseAndFormatResourceLimits(ResourcesLimits{Memory: Ref("1.5Gi")}))
+	// 0.5G == 0.5 * 1000^3 == 500000000 bytes.
+	assert.Equal(t, "-1 500000000 <nil>", parseAndFormatResourceLimits(ResourcesLimits{Memory: Ref("0.5G")}))
+	// 2.5M == 2.5 * 1000^2 == 2500000 bytes.
+	assert.Equal(t, "-1 2500000 <nil>", parseAndFormatResourceLimits(ResourcesLimits{Memory: Ref("2.5M")}))
+
+	// Peta- and exa-scale suffixes are accepted by the schema now; parser should handle them.
+	// 1P == 1000^5 == 1e15.
+	assert.Equal(t, "-1 1000000000000000 <nil>", parseAndFormatResourceLimits(ResourcesLimits{Memory: Ref("1P")}))
+	// 1Pi == 1024^5 == 1125899906842624.
+	assert.Equal(t, "-1 1125899906842624 <nil>", parseAndFormatResourceLimits(ResourcesLimits{Memory: Ref("1Pi")}))
 }
